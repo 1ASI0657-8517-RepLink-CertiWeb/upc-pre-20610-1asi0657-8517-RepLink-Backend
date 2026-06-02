@@ -23,7 +23,7 @@ public record CreateCarCommand(
     int BrandId,
     string Model,
     string? Description,
-    string PdfCertification,
+    string? PdfCertification,
     string? ImageUrl,
     decimal Price,
     string LicensePlate,

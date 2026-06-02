@@ -3,6 +3,8 @@ using CertiWeb.API.Reservation.Domain.Model.Commands;
 using CertiWeb.API.Reservation.Domain.Repositories;
 using CertiWeb.API.Reservation.Domain.Services;
 using CertiWeb.API.Shared.Domain.Repositories;
+using CertiWeb.API.Certifications.Domain.Services;
+using CertiWeb.API.Certifications.Domain.Model.Commands;
 using ReservationEntity = CertiWeb.API.Reservation.Domain.Model.Aggregates.Reservation;
 
 namespace CertiWeb.API.Reservation.Application.Internal.CommandServices;
@@ -14,16 +16,19 @@ public class ReservationCommandServiceImpl : IReservationCommandService
 {
     private readonly IReservationRepository _reservationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICarCommandService _carCommandService;
 
     /// <summary>
     /// Initializes a new instance of the ReservationCommandServiceImpl class.
     /// </summary>
     /// <param name="reservationRepository">The reservation repository.</param>
     /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    public ReservationCommandServiceImpl(IReservationRepository reservationRepository, IUnitOfWork unitOfWork)
+    /// <param name="carCommandService">The car command service for creating cars from accepted reservations.</param>
+    public ReservationCommandServiceImpl(IReservationRepository reservationRepository, IUnitOfWork unitOfWork, ICarCommandService carCommandService)
     {
         _reservationRepository = reservationRepository;
         _unitOfWork = unitOfWork;
+        _carCommandService = carCommandService;
     }
 
     /// <summary>
@@ -86,12 +91,52 @@ public class ReservationCommandServiceImpl : IReservationCommandService
             throw new ArgumentException("Status must be one of: pending, accepted, rejected.");
         }
 
+        var previousStatus = reservation.Status;
         reservation.Status = command.Status.ToLower();
         
         try
         {
             _reservationRepository.Update(reservation);
             await _unitOfWork.CompleteAsync();
+            
+            // If status changed to "accepted", automatically create a car from this reservation
+            if (previousStatus != "accepted" && reservation.Status == "accepted")
+            {
+                try
+                {
+                    Console.WriteLine($"Auto-creating car from accepted reservation ID {reservation.Id}");
+                    
+                    // Extract price as decimal (removing "SOL" if present)
+                    decimal price = 100;
+                    if (decimal.TryParse(reservation.Price?.Replace("SOL", "").Trim(), out var parsedPrice))
+                    {
+                        price = parsedPrice;
+                    }
+                    
+                    var createCarCommand = new CreateCarCommand(
+                        Title: $"{reservation.Brand} {reservation.Model} Certification",
+                        Owner: reservation.ReservationName,
+                        OwnerEmail: reservation.ReservationEmail,
+                        Year: DateTime.Now.Year,
+                        BrandId: 1, 
+                        Model: reservation.Model,
+                        Description: $"Auto-created from reservation {reservation.Id}",
+                        PdfCertification: null,
+                        ImageUrl: reservation.ImageUrl,
+                        Price: price,
+                        LicensePlate: reservation.LicensePlate,
+                        OriginalReservationId: reservation.Id
+                    );
+                    
+                    var createdCar = await _carCommandService.Handle(createCarCommand);
+                    Console.WriteLine($"Car created successfully with ID: {createdCar?.Id ?? 0}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to auto-create car from reservation {reservation.Id}: {ex.Message}");
+                }
+            }
+            
             return reservation;
         }
         catch (Exception)

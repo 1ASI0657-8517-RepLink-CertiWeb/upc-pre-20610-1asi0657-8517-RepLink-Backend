@@ -129,17 +129,17 @@ builder.Services.AddScoped<IUserQueryService, UserQueryServiceImpl>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// Reservation Bounded Context Dependency Injection Configuration
-builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
-builder.Services.AddScoped<IReservationCommandService, ReservationCommandServiceImpl>();
-builder.Services.AddScoped<IReservationQueryService, ReservationQueryServiceImpl>();
-
-// Certifications Bounded Context Dependency Injection Configuration
+// Certifications Bounded Context Dependency Injection Configuration (must be before Reservation)
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<ICarCommandService, CarCommandServiceImpl>();
 builder.Services.AddScoped<ICarQueryService, CarQueryServiceImpl>();
 builder.Services.AddScoped<BrandQueryServiceImpl>();
+
+// Reservation Bounded Context Dependency Injection Configuration
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationCommandService, ReservationCommandServiceImpl>();
+builder.Services.AddScoped<IReservationQueryService, ReservationQueryServiceImpl>();
 
 // IAM Bounded Context Injection Configuration
 builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();

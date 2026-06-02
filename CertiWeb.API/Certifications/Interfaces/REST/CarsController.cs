@@ -30,7 +30,44 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
         Console.WriteLine("--- CREATE CAR ACTION START ---");
         Console.WriteLine($"Received resource: Title='{resource.Title}', Year={resource.Year}, BrandId={resource.BrandId}, LicensePlate='{resource.LicensePlate}'");
 
-        // Generate defaults for missing fields
+        // Generate defaults for ALL missing fields
+        if (string.IsNullOrWhiteSpace(resource.Title))
+        {
+            resource = resource with { Title = $"Car Certification {Guid.NewGuid().ToString().Substring(0, 8)}" };
+            Console.WriteLine($"Generated Title: {resource.Title}");
+        }
+
+        if (string.IsNullOrWhiteSpace(resource.Owner))
+        {
+            resource = resource with { Owner = "Vehicle Owner" };
+            Console.WriteLine($"Generated Owner: {resource.Owner}");
+        }
+
+        if (string.IsNullOrWhiteSpace(resource.OwnerEmail))
+        {
+            resource = resource with { OwnerEmail = $"owner-{Guid.NewGuid().ToString().Substring(0, 8)}@certiweb.local" };
+            Console.WriteLine($"Generated OwnerEmail: {resource.OwnerEmail}");
+        }
+
+        if (resource.Year == 0 || resource.Year < 1900 || resource.Year > DateTime.Now.Year + 1)
+        {
+            resource = resource with { Year = DateTime.Now.Year };
+            Console.WriteLine($"Generated Year: {resource.Year}");
+        }
+
+        if (resource.BrandId <= 0)
+        {
+            resource = resource with { BrandId = 1 }; // Default to first brand
+            Console.WriteLine($"Generated BrandId: {resource.BrandId}");
+        }
+
+        if (string.IsNullOrWhiteSpace(resource.Model))
+        {
+            resource = resource with { Model = "Certification Model" };
+            Console.WriteLine($"Generated Model: {resource.Model}");
+        }
+
+        // Generate defaults for optional fields
         if (string.IsNullOrWhiteSpace(resource.LicensePlate))
         {
             resource = resource with { LicensePlate = Guid.NewGuid().ToString().Substring(0, 10).ToUpperInvariant() };
@@ -51,16 +88,7 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
         }
 
         // Basic input validation to provide friendly HTTP 400 responses for invalid inputs
-        if (resource.Year < 1900 || resource.Year > DateTime.Now.Year + 1)
-        {
-            Console.WriteLine($"!!! YEAR VALIDATION FAILED: Year '{resource.Year}' is out of range.");
-            return BadRequest(new { message = "Validation error", details = "Year must be between 1900 and current year + 1" });
-        }
-        if (resource.BrandId <= 0)
-        {
-            Console.WriteLine($"!!! BRANDID VALIDATION FAILED: BrandId '{resource.BrandId}' is not positive.");
-            return BadRequest(new { message = "Validation error", details = "BrandId must be a positive integer" });
-        }
+        // (Year, BrandId, Price already have defaults generated above)
         if (resource.Price < 0)
         {
             Console.WriteLine($"!!! PRICE VALIDATION FAILED: Price '{resource.Price}' is negative.");

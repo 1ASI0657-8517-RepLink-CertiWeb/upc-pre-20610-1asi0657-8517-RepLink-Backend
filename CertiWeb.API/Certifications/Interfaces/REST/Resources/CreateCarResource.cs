@@ -18,15 +18,15 @@ namespace CertiWeb.API.Certifications.Interfaces.REST.Resources;
 /// <param name="LicensePlate">The license plate.</param>
 /// <param name="OriginalReservationId">The original reservation ID.</param>
 public record CreateCarResource(
-    [Required] [MaxLength(200)] string Title,
-    [Required] [MaxLength(100)] string Owner,
-    [Required] [MaxLength(100)] [EmailAddress] string OwnerEmail,
-    [Required] int Year,
-    [Required] int BrandId,
-    [Required] [MaxLength(100)] string Model,
-    [MaxLength(500)] string? Description,
-    [MaxLength(5000)] string? PdfCertification,
-    [MaxLength(500)] string? ImageUrl,
+    [MaxLength(200)] string? Title = null,
+    [MaxLength(100)] string? Owner = null,
+    [EmailAddress] [MaxLength(100)] string? OwnerEmail = null,
+    int Year = 0,
+    int BrandId = 0,
+    [MaxLength(100)] string? Model = null,
+    [MaxLength(500)] string? Description = null,
+    [MaxLength(5000)] string? PdfCertification = null,
+    [MaxLength(500)] string? ImageUrl = null,
     decimal Price = 0,
     [MaxLength(15)] string? LicensePlate = null,
     int OriginalReservationId = 0

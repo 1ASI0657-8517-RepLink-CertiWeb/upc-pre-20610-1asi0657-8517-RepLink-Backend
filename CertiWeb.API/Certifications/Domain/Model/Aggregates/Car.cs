@@ -120,7 +120,7 @@ public class Car
         BrandId = command.BrandId;
         Model = command.Model;
         Description = command.Description;
-        PdfCertification = new PdfCertification(command.PdfCertification);
+        PdfCertification = new PdfCertification(command.PdfCertification ?? "JVBERi0xLjAKJ");
         ImageUrl = command.ImageUrl;
         Price = new Price(command.Price);
         LicensePlate = new LicensePlate(command.LicensePlate);

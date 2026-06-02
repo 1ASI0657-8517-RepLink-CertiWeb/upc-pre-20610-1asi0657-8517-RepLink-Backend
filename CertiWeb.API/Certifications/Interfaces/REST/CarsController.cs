@@ -45,7 +45,8 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
 
         if (resource.OriginalReservationId == 0)
         {
-            resource = resource with { OriginalReservationId = 1 };
+            // Generate a unique reservation ID using a pseudo-random approach
+            resource = resource with { OriginalReservationId = Math.Abs(Guid.NewGuid().GetHashCode() % 999) + 1 };
             Console.WriteLine($"Set default OriginalReservationId: {resource.OriginalReservationId}");
         }
 

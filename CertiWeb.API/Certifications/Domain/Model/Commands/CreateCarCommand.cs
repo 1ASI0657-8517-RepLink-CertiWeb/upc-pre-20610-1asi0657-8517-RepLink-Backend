@@ -27,5 +27,5 @@ public record CreateCarCommand(
     string? ImageUrl,
     decimal Price = 100,
     string? LicensePlate = null,
-    int OriginalReservationId = 1
+    int OriginalReservationId = 0
 );

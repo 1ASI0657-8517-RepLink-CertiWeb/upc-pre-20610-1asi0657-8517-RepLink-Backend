@@ -30,6 +30,25 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
         Console.WriteLine("--- CREATE CAR ACTION START ---");
         Console.WriteLine($"Received resource: Title='{resource.Title}', Year={resource.Year}, BrandId={resource.BrandId}, LicensePlate='{resource.LicensePlate}'");
 
+        // Generate defaults for missing fields
+        if (string.IsNullOrWhiteSpace(resource.LicensePlate))
+        {
+            resource = resource with { LicensePlate = Guid.NewGuid().ToString().Substring(0, 10).ToUpperInvariant() };
+            Console.WriteLine($"Generated LicensePlate: {resource.LicensePlate}");
+        }
+
+        if (resource.Price == 0 || resource.Price < 0)
+        {
+            resource = resource with { Price = 100 };
+            Console.WriteLine($"Set default Price: {resource.Price}");
+        }
+
+        if (resource.OriginalReservationId == 0)
+        {
+            resource = resource with { OriginalReservationId = 1 };
+            Console.WriteLine($"Set default OriginalReservationId: {resource.OriginalReservationId}");
+        }
+
         // Basic input validation to provide friendly HTTP 400 responses for invalid inputs
         if (resource.Year < 1900 || resource.Year > DateTime.Now.Year + 1)
         {

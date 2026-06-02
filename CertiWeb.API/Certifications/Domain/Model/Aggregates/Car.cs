@@ -123,7 +123,7 @@ public class Car
         PdfCertification = new PdfCertification(command.PdfCertification ?? "JVBERi0xLjAKJ");
         ImageUrl = command.ImageUrl;
         Price = new Price(command.Price);
-        LicensePlate = new LicensePlate(command.LicensePlate);
+        LicensePlate = new LicensePlate(command.LicensePlate ?? Guid.NewGuid().ToString().Substring(0, 10).ToUpperInvariant());
         OriginalReservationId = command.OriginalReservationId;
     }
 }

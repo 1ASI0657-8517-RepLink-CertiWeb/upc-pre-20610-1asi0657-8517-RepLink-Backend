@@ -25,7 +25,7 @@ public record CreateCarCommand(
     string? Description,
     string? PdfCertification,
     string? ImageUrl,
-    decimal Price,
-    string LicensePlate,
-    int OriginalReservationId
+    decimal Price = 100,
+    string? LicensePlate = null,
+    int OriginalReservationId = 1
 );

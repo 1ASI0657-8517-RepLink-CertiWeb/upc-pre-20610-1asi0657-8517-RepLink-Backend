@@ -43,11 +43,14 @@ public class CarCommandServiceImpl(ICarRepository carRepository, IBrandRepositor
             throw new ArgumentException("Reservation already used", nameof(command.OriginalReservationId));
         }
 
-        var existingLicensePlate = await carRepository.FindCarByLicensePlateAsync(command.LicensePlate);
-        if (existingLicensePlate != null)
+        if (!string.IsNullOrWhiteSpace(command.LicensePlate))
         {
-            Console.WriteLine($"License plate {command.LicensePlate} already exists");
-            throw new InvalidOperationException("License plate already exists");
+            var existingLicensePlate = await carRepository.FindCarByLicensePlateAsync(command.LicensePlate);
+            if (existingLicensePlate != null)
+            {
+                Console.WriteLine($"License plate {command.LicensePlate} already exists");
+                throw new InvalidOperationException("License plate already exists");
+            }
         }
 
         car.Brand = brand;

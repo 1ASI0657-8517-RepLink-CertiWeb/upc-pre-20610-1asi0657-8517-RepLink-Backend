@@ -27,7 +27,7 @@ public record CreateCarResource(
     [MaxLength(500)] string? Description,
     [MaxLength(5000)] string? PdfCertification,
     [MaxLength(500)] string? ImageUrl,
-    [Required] decimal Price,
-    [Required] string LicensePlate,
-    [Required] int OriginalReservationId
+    decimal Price = 0,
+    [MaxLength(15)] string? LicensePlate = null,
+    int OriginalReservationId = 0
 );

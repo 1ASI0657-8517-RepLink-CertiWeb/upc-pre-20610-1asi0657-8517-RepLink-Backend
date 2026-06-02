@@ -52,14 +52,22 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             Console.WriteLine($"!!! LICENSE PLATE VALIDATION FAILED: LicensePlate '{resource.LicensePlate}' contains a hyphen.");
             return BadRequest(new { message = "Validation error", details = "License plate cannot contain hyphens or special characters" });
         }
-        // Validate pdf certification base64 quick check before creating domain object
+         // Validate pdf certification base64 quick check before creating domain object
         if (!string.IsNullOrWhiteSpace(resource.PdfCertification))
         {
-            var tmp = new CertiWeb.API.Certifications.Domain.Model.ValueObjects.PdfCertification(resource.PdfCertification);
-            if (!tmp.IsValidBase64())
+            try
             {
-                Console.WriteLine($"!!! PDF VALIDATION FAILED: PdfCertification is not valid Base64.");
-                return BadRequest(new { message = "Validation error", details = "Invalid PDF certification" });
+                var tmp = new CertiWeb.API.Certifications.Domain.Model.ValueObjects.PdfCertification(resource.PdfCertification);
+                if (!tmp.IsValidBase64())
+                {
+                    Console.WriteLine($"!!! PDF VALIDATION FAILED: PdfCertification is not valid Base64.");
+                    return BadRequest(new { message = "Validation error", details = "Invalid PDF certification" });
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"!!! PDF VALIDATION FAILED: {ex.Message}");
+                return BadRequest(new { message = "Validation error", details = "Invalid PDF certification: " + ex.Message });
             }
         }
 
@@ -67,6 +75,34 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
         {
             Console.WriteLine("Validation passed, proceeding to command creation.");
             Console.WriteLine($"Received CreateCarResource: {System.Text.Json.JsonSerializer.Serialize(resource)}");
+            
+            // Generate a dummy PDF if not provided
+            if (string.IsNullOrWhiteSpace(resource.PdfCertification))
+            {
+                // Create a simple base64-encoded PDF content
+                string dummyPdfBase64 = "JVBERi0xLjQKJeLj" + 
+                    "z7zPvM++z7zPvs+8z7zPvM+8z7zPvM+8z7vPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv" +
+                    "M+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7" +
+                    "zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPvM+8z7zPv";
+                
+                // Create a modified resource with the dummy PDF
+                resource = resource with { PdfCertification = dummyPdfBase64 };
+                Console.WriteLine("Generated dummy PDF for missing certification");
+            }
             
             var createCarCommand = CreateCarCommandFromResourceAssembler.ToCommandFromResource(resource);
             var car = await carCommandService.Handle(createCarCommand);

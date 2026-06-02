@@ -154,10 +154,16 @@ var app = builder.Build();
 // Verify if the database exists and create it if it doesn't
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-
-    context.Database.EnsureCreated();
+    try
+    {
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning($"Database initialization failed: {ex.Message}. The application will continue running.");
+    }
 }
 
 // Configure the HTTP request pipeline.

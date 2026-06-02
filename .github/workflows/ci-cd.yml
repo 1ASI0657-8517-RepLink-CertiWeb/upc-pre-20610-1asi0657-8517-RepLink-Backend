@@ -1,0 +1,75 @@
+# Nombre del Pipeline de DevOps para CertiWeb
+name: CertiWeb CI/CD Pipeline
+
+on:
+  # 1. Disparar en Pull Requests hacia 'main' (Solo compila y prueba)
+  pull_request:
+    branches: [ main ]
+  
+  # 2. Disparar en 'push' a 'main' (Compila, prueba, y despliega)
+  push:
+    branches: [ main ]
+
+jobs:
+  #----------------------------------------------------
+  # 7.1. INTEGRACIÓN CONTINUA (CI)
+  #----------------------------------------------------
+  build_and_test:
+    name: 1. Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Descargar el código del repositorio
+    - name: Checkout repository # Descarga el código fuente
+      uses: actions/checkout@v4
+
+    # 2. Configurar el SDK de .NET 9.0 (basado en CertiWeb.API.csproj)
+    - name: Setup .NET 9.0 SDK # Prepara el entorno .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    # 3. Restaurar dependencias de NuGet
+    - name: Restore dependencies # Restaura dependencias NuGet
+      run: dotnet restore certiweb-platform.sln
+
+    # 4. Compilar la solución completa
+    - name: Build solution # Compila la solución
+      run: dotnet build certiweb-platform.sln --no-restore
+
+    # 5. Ejecutar TODOS los proyectos de prueba (Unit, Integration, System)
+    #
+    - name: Run all tests # Ejecuta todas las pruebas (unitarias, integración, sistema)
+      run: dotnet test certiweb-platform.sln --no-build --verbosity normal
+
+  #----------------------------------------------------
+  # ARTEFACTO DE CI: Construir y publicar imagen Docker
+  #----------------------------------------------------
+  build_and_push_docker:
+    name: 2. Build & Push Docker Image
+    runs-on: ubuntu-latest
+    # Este job solo corre si 'build_and_test' fue exitoso
+    needs: build_and_test
+    # Solo corre en 'push' a 'main', no en Pull Requests
+    if: github.event_name == 'push' 
+
+    steps:
+    - name: Checkout repository # Descarga el código fuente
+      uses: actions/checkout@v4
+
+    # 1. Iniciar sesión en un registro de contenedores (ej. Docker Hub)
+    # Necesitas configurar DOCKERHUB_USERNAME y DOCKERHUB_TOKEN como secretos en GitHub
+    - name: Log in to Docker Hub # Autenticación en Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # 2. Construir y publicar la imagen usando el Dockerfile del proyecto
+    - name: Build and push Docker image # Construye y publica la imagen Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: CertiWeb.API/Dockerfile 
+        push: true
+        tags: svennn420/certiweb-api:latest

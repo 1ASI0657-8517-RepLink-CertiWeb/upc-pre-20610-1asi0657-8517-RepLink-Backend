@@ -1,0 +1,379 @@
+﻿{
+    "openapi":  "3.0.4",
+    "info":  {
+                 "title":  "CertiWeb.API",
+                 "description":  "CertiWeb Platform API",
+                 "termsOfService":  "https://acme-learning.com/tos",
+                 "contact":  {
+                                 "name":  "Certi Web",
+                                 "email":  "contact@acme.com"
+                             },
+                 "license":  {
+                                 "name":  "Apache 2.0",
+                                 "url":  "https://www.apache.org/licenses/LICENSE-2.0.html"
+                             },
+                 "version":  "v1"
+             },
+    "paths":  {
+                  "/api/v1/admin_user/login":  {
+                                                   "post":  {
+                                                                "tags":  "AdminUsers",
+                                                                "requestBody":  "@{content=}",
+                                                                "responses":  "@{200=}"
+                                                            }
+                                               },
+                  "/api/v1/admin_user":  {
+                                             "get":  {
+                                                         "tags":  "AdminUsers",
+                                                         "responses":  "@{200=}"
+                                                     }
+                                         },
+                  "/api/v1/admin_user/{id}":  {
+                                                  "get":  {
+                                                              "tags":  "AdminUsers",
+                                                              "parameters":  "",
+                                                              "responses":  "@{200=}"
+                                                          }
+                                              },
+                  "/api/v1/admin_user/by-email/{email}":  {
+                                                              "get":  {
+                                                                          "tags":  "AdminUsers",
+                                                                          "parameters":  "",
+                                                                          "responses":  "@{200=}"
+                                                                      }
+                                                          },
+                  "/api/v1/admin_user/migrate-passwords":  {
+                                                               "post":  {
+                                                                            "tags":  "AdminUsers",
+                                                                            "responses":  "@{200=}"
+                                                                        }
+                                                           },
+                  "/api/v1/admin_user/test-password":  {
+                                                           "post":  {
+                                                                        "tags":  "AdminUsers",
+                                                                        "requestBody":  "@{content=}",
+                                                                        "responses":  "@{200=}"
+                                                                    }
+                                                       },
+                  "/api/v1/auth":  {
+                                       "post":  {
+                                                    "tags":  "Authentication",
+                                                    "summary":  "Register user",
+                                                    "description":  "Register a new user in the system",
+                                                    "operationId":  "RegisterUser",
+                                                    "requestBody":  "@{content=}",
+                                                    "responses":  "@{201=; 400=}"
+                                                }
+                                   },
+                  "/api/v1/auth/login":  {
+                                             "post":  {
+                                                          "tags":  "Authentication",
+                                                          "summary":  "Login user",
+                                                          "description":  "Authenticate a user with email and password",
+                                                          "operationId":  "LoginUser",
+                                                          "requestBody":  "@{content=}",
+                                                          "responses":  "@{200=; 401=}"
+                                                      }
+                                         },
+                  "/api/v1/brands":  {
+                                         "get":  {
+                                                     "tags":  "Brands",
+                                                     "responses":  "@{200=}"
+                                                 }
+                                     },
+                  "/api/v1/cars":  {
+                                       "post":  {
+                                                    "tags":  "Cars",
+                                                    "requestBody":  "@{content=}",
+                                                    "responses":  "@{200=}"
+                                                },
+                                       "get":  {
+                                                   "tags":  "Cars",
+                                                   "responses":  "@{200=}"
+                                               }
+                                   },
+                  "/api/v1/cars/{carId}":  {
+                                               "get":  {
+                                                           "tags":  "Cars",
+                                                           "parameters":  "",
+                                                           "responses":  "@{200=}"
+                                                       },
+                                               "patch":  {
+                                                             "tags":  "Cars",
+                                                             "parameters":  "",
+                                                             "requestBody":  "@{content=}",
+                                                             "responses":  "@{200=}"
+                                                         },
+                                               "delete":  {
+                                                              "tags":  "Cars",
+                                                              "summary":  "Deletes a car certification",
+                                                              "description":  "Deletes a car certification from the system",
+                                                              "operationId":  "DeleteCar",
+                                                              "parameters":  "",
+                                                              "responses":  "@{204=; 404=; 500=}"
+                                                          }
+                                           },
+                  "/api/v1/cars/brand/{brandId}":  {
+                                                       "get":  {
+                                                                   "tags":  "Cars",
+                                                                   "parameters":  "",
+                                                                   "responses":  "@{200=}"
+                                                               }
+                                                   },
+                  "/api/v1/cars/owner/{ownerEmail}":  {
+                                                          "get":  {
+                                                                      "tags":  "Cars",
+                                                                      "parameters":  "",
+                                                                      "responses":  "@{200=}"
+                                                                  }
+                                                      },
+                  "/api/v1/cars/{id}/pdf":  {
+                                                "get":  {
+                                                            "tags":  "Cars",
+                                                            "parameters":  "",
+                                                            "responses":  "@{200=}"
+                                                        }
+                                            },
+                  "/api/v1/reports/{id}":  {
+                                               "get":  {
+                                                           "tags":  "Reports",
+                                                           "summary":  "Obtener informe técnico por ID",
+                                                           "description":  "Recupera el informe técnico de un vehículo certificado, incluyendo URL del PDF para descargar o visualizar.",
+                                                           "parameters":  "",
+                                                           "responses":  "@{200=; 404=; 500=}"
+                                                       }
+                                           },
+                  "/api/v1/reservations":  {
+                                               "post":  {
+                                                            "tags":  "Reservations",
+                                                            "summary":  "Creates a new reservation",
+                                                            "description":  "Creates a new reservation with the provided data",
+                                                            "operationId":  "CreateReservation",
+                                                            "requestBody":  "@{content=}",
+                                                            "responses":  "@{201=; 400=}"
+                                                        },
+                                               "get":  {
+                                                           "tags":  "Reservations",
+                                                           "summary":  "Gets all reservations",
+                                                           "description":  "Gets all reservations in the system",
+                                                           "operationId":  "GetAllReservations",
+                                                           "responses":  "@{200=}"
+                                                       }
+                                           },
+                  "/api/v1/reservations/{reservationId}":  {
+                                                               "get":  {
+                                                                           "tags":  "Reservations",
+                                                                           "summary":  "Gets a reservation by id",
+                                                                           "description":  "Gets a reservation for the given identifier",
+                                                                           "operationId":  "GetReservationById",
+                                                                           "parameters":  "",
+                                                                           "responses":  "@{200=; 404=}"
+                                                                       },
+                                                               "put":  {
+                                                                           "tags":  "Reservations",
+                                                                           "summary":  "Updates a reservation",
+                                                                           "description":  "Updates a reservation with the provided data",
+                                                                           "operationId":  "UpdateReservation",
+                                                                           "parameters":  "",
+                                                                           "requestBody":  "@{content=}",
+                                                                           "responses":  "@{200=; 404=; 400=}"
+                                                                       },
+                                                               "delete":  {
+                                                                              "tags":  "Reservations",
+                                                                              "summary":  "Deletes a reservation",
+                                                                              "description":  "Deletes a reservation from the system",
+                                                                              "operationId":  "DeleteReservation",
+                                                                              "parameters":  "",
+                                                                              "responses":  "@{204=; 404=; 500=}"
+                                                                          }
+                                                           },
+                  "/api/v1/reservations/user/{userId}":  {
+                                                             "get":  {
+                                                                         "tags":  "Reservations",
+                                                                         "summary":  "Gets reservations by user id",
+                                                                         "description":  "Gets all reservations for the given user identifier",
+                                                                         "operationId":  "GetReservationsByUserId",
+                                                                         "parameters":  "",
+                                                                         "responses":  "@{200=}"
+                                                                     }
+                                                         },
+                  "/api/v1/reservations/status/{status}":  {
+                                                               "get":  {
+                                                                           "tags":  "Reservations",
+                                                                           "summary":  "Gets reservations by status",
+                                                                           "description":  "Gets all reservations with the given status",
+                                                                           "operationId":  "GetReservationsByStatus",
+                                                                           "parameters":  "",
+                                                                           "responses":  "@{200=}"
+                                                                       }
+                                                           },
+                  "/api/v1/reservations/{reservationId}/status":  {
+                                                                      "put":  {
+                                                                                  "tags":  "Reservations",
+                                                                                  "summary":  "Updates reservation status",
+                                                                                  "description":  "Updates the status of the given reservation",
+                                                                                  "operationId":  "UpdateReservationStatus",
+                                                                                  "parameters":  "",
+                                                                                  "requestBody":  "@{content=}",
+                                                                                  "responses":  "@{200=; 404=}"
+                                                                              }
+                                                                  },
+                  "/api/v1/users":  {
+                                        "get":  {
+                                                    "tags":  "Users",
+                                                    "responses":  "@{200=}"
+                                                }
+                                    },
+                  "/api/v1/users/{userId}":  {
+                                                 "get":  {
+                                                             "tags":  "Users",
+                                                             "parameters":  "",
+                                                             "responses":  "@{200=}"
+                                                         }
+                                             },
+                  "/api/v1/users/email/{email}":  {
+                                                      "get":  {
+                                                                  "tags":  "Users",
+                                                                  "parameters":  "",
+                                                                  "responses":  "@{200=}"
+                                                              }
+                                                  },
+                  "/api/v1/users/plan/{plan}":  {
+                                                    "get":  {
+                                                                "tags":  "Users",
+                                                                "parameters":  "",
+                                                                "responses":  "@{200=}"
+                                                            }
+                                                },
+                  "/api/v1/users/migrate-passwords":  {
+                                                          "post":  {
+                                                                       "tags":  "Users",
+                                                                       "responses":  "@{200=}"
+                                                                   }
+                                                      },
+                  "/api/v1/users/test-password":  {
+                                                      "post":  {
+                                                                   "tags":  "Users",
+                                                                   "requestBody":  "@{content=}",
+                                                                   "responses":  "@{200=}"
+                                                               }
+                                                  }
+              },
+    "components":  {
+                       "schemas":  {
+                                       "AdminUserResource":  {
+                                                                 "type":  "object",
+                                                                 "properties":  "@{id=; name=; email=; password=; createdDate=; updatedDate=}",
+                                                                 "additionalProperties":  false
+                                                             },
+                                       "AuthenticatedUserResource":  {
+                                                                         "type":  "object",
+                                                                         "properties":  "@{id=; name=; email=; plan=; token=}",
+                                                                         "additionalProperties":  false
+                                                                     },
+                                       "CarResource":  {
+                                                           "required":  "brand licensePlate model owner ownerEmail title",
+                                                           "type":  "object",
+                                                           "properties":  "@{id=; title=; owner=; ownerEmail=; year=; brandId=; brand=; model=; description=; imageUrl=; price=; licensePlate=; originalReservationId=; hasPdfCertification=}",
+                                                           "additionalProperties":  false
+                                                       },
+                                       "CreateCarResource":  {
+                                                                 "type":  "object",
+                                                                 "properties":  "@{title=; owner=; ownerEmail=; year=; brandId=; model=; description=; pdfCertification=; imageUrl=; price=; licensePlate=; originalReservationId=}",
+                                                                 "additionalProperties":  false
+                                                             },
+                                       "CreateReservationResource":  {
+                                                                         "type":  "object",
+                                                                         "properties":  "@{userId=; reservationName=; reservationEmail=; imageUrl=; brand=; model=; licensePlate=; inspectionDateTime=; price=}",
+                                                                         "additionalProperties":  false
+                                                                     },
+                                       "CreateUserResource":  {
+                                                                  "type":  "object",
+                                                                  "properties":  "@{name=; email=; password=; plan=}",
+                                                                  "additionalProperties":  false
+                                                              },
+                                       "LoginAdminRequest":  {
+                                                                 "type":  "object",
+                                                                 "properties":  "@{email=; password=}",
+                                                                 "additionalProperties":  false
+                                                             },
+                                       "LoginRequest":  {
+                                                            "type":  "object",
+                                                            "properties":  "@{email=; password=}",
+                                                            "additionalProperties":  false
+                                                        },
+                                       "ReportResource":  {
+                                                              "type":  "object",
+                                                              "properties":  "@{id=; carId=; title=; owner=; ownerEmail=; brand=; model=; year=; licensePlate=; pdfUrl=}",
+                                                              "additionalProperties":  false
+                                                          },
+                                       "ReservationResource":  {
+                                                                   "type":  "object",
+                                                                   "properties":  "@{id=; userId=; reservationName=; reservationEmail=; imageUrl=; brand=; model=; licensePlate=; inspectionDateTime=; price=; status=}",
+                                                                   "additionalProperties":  false
+                                                               },
+                                       "TestAdminPasswordRequest":  {
+                                                                        "type":  "object",
+                                                                        "properties":  "@{email=; password=}",
+                                                                        "additionalProperties":  false
+                                                                    },
+                                       "TestPasswordRequest":  {
+                                                                   "type":  "object",
+                                                                   "properties":  "@{email=; password=}",
+                                                                   "additionalProperties":  false
+                                                               },
+                                       "UpdateCarResource":  {
+                                                                 "type":  "object",
+                                                                 "properties":  "@{title=; owner=; ownerEmail=; year=; brandId=; model=; description=; pdfCertification=; imageUrl=; price=; licensePlate=}",
+                                                                 "additionalProperties":  false
+                                                             },
+                                       "UpdateReservationResource":  {
+                                                                         "type":  "object",
+                                                                         "properties":  "@{status=}",
+                                                                         "additionalProperties":  false
+                                                                     },
+                                       "UserResource":  {
+                                                            "type":  "object",
+                                                            "properties":  "@{id=; name=; email=; password=; plan=}",
+                                                            "additionalProperties":  false
+                                                        }
+                                   },
+                       "securitySchemes":  {
+                                               "Bearer":  {
+                                                              "type":  "http",
+                                                              "description":  "Please enter token",
+                                                              "scheme":  "bearer",
+                                                              "bearerFormat":  "JWT"
+                                                          }
+                                           }
+                   },
+    "security":  [
+                     {
+                         "Bearer":  [
+
+                                    ]
+                     }
+                 ],
+    "tags":  [
+                 {
+                     "name":  "Authentication",
+                     "description":  "Authentication Endpoints"
+                 },
+                 {
+                     "name":  "Users",
+                     "description":  "Available User Endpoints."
+                 },
+                 {
+                     "name":  "Brands",
+                     "description":  "Available Brand Endpoints."
+                 },
+                 {
+                     "name":  "Cars",
+                     "description":  "Available Car Certification Endpoints."
+                 },
+                 {
+                     "name":  "Reports",
+                     "description":  "Report Endpoints"
+                 }
+             ]
+}

@@ -1,22 +1,47 @@
 services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: certiweb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - certiweb-network
+
   api:
     image: "svennn/certiweb-api:latest"
     ports:
       - "3000:8080"
     depends_on:
-      - mysql
+      - postgres
     environment:
-      - ConnectionStrings__DefaultConnection=server=mysql;user=root;password=root;database=certiweb
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
     networks:
       - certiweb-network
 
-  mysql:
-    image: mysql:8.0
+  api2:
+    image: "svennn/certiweb-api:latest"
+    ports:
+      - "3001:8080"
+    depends_on:
+      - postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: certiweb
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
+    networks:
+      - certiweb-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - api2
     networks:
       - certiweb-network
 
@@ -25,14 +50,14 @@ services:
     ports:
       - "5173:80"
     depends_on:
-      - api
+      - nginx
     environment:
-      - VITE_SERVER_BASE_PATH=http://api:80/api/v1
+      - VITE_SERVER_BASE_PATH=http://nginx:80/api/v1
     networks:
       - certiweb-network
 
 volumes:
-  mysql_data:
+  postgres_data:
 
 networks:
   certiweb-network:

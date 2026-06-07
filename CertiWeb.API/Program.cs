@@ -30,6 +30,7 @@ using CertiWeb.API.Users.Infrastructure.Pipeline.Middleware.Extensions;
 using CertiWeb.API.Users.Infrastructure.Tokens.JWT.Configuration;
 using CertiWeb.API.Users.Infrastructure.Tokens.JWT.Services;
 using CertiWeb.API.Users.Interfaces.ACL;
+using CertiWeb.API.Shared.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -136,6 +137,9 @@ builder.Services.AddScoped<ICarCommandService, CarCommandServiceImpl>();
 builder.Services.AddScoped<ICarQueryService, CarQueryServiceImpl>();
 builder.Services.AddScoped<BrandQueryServiceImpl>();
 
+// Storage Service for PDF management
+builder.Services.AddScoped<IStorageService, LocalBase64StorageService>();
+
 // Reservation Bounded Context Dependency Injection Configuration
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationCommandService, ReservationCommandServiceImpl>();
@@ -205,6 +209,9 @@ if (app.Environment.IsEnvironment("Testing"))
         await next();
     });
 }
+
+// Enable endpoint routing so middlewares can read endpoint metadata (AllowAnonymous etc.)
+app.UseRouting();
 
 // Add Authorization Middleware to Pipeline
 app.UseRequestAuthorization();

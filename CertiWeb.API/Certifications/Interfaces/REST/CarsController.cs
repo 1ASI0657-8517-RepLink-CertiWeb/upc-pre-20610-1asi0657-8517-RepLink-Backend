@@ -391,4 +391,34 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             return StatusCode(500, new { message = "Internal server error", details = ex.Message });
         }
     }
+    
+    /// <summary>
+    /// Gets certificate validity information.
+    /// </summary>
+    /// <param name="carId">Car identifier.</param>
+    /// <returns>Certificate validity details.</returns>
+    [HttpGet("{carId:int}/certificate-validity")]
+    public async Task<IActionResult> GetCertificateValidity(int carId)
+    {
+        var query = new GetCarByIdQuery(carId);
+        var car = await carQueryService.Handle(query);
+
+        if (car == null)
+            return NotFound(new { message = "Car not found" });
+
+        var now = DateTime.UtcNow;
+        var isValid = now <= car.CertificateExpirationDate;
+
+        var resource = new CertificateValidityResource(
+            car.Id,
+            car.CreatedAt,
+            car.CertificateExpirationDate,
+            isValid,
+            isValid
+                ? (int)Math.Ceiling((car.CertificateExpirationDate - now).TotalDays)
+                : 0
+        );
+
+        return Ok(resource);
+    }
 }

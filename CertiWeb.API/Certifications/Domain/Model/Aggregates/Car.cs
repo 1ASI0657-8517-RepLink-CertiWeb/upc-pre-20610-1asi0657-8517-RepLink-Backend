@@ -91,6 +91,16 @@ public class Car
     /// Gets or sets the original reservation ID.
     /// </summary>
     public int OriginalReservationId { get; set; }
+    
+    /// <summary>
+    /// Gets the certificate creation date.
+    /// </summary>
+    public DateTime CreatedAt { get; private set; }
+
+    /// <summary>
+    /// Gets the certificate expiration date.
+    /// </summary>
+    public DateTime CertificateExpirationDate { get; private set; }
 
     /// <summary>
     /// Parameterless constructor for EF Core and tests.
@@ -125,5 +135,11 @@ public class Car
         Price = new Price(command.Price);
         LicensePlate = new LicensePlate(command.LicensePlate ?? Guid.NewGuid().ToString().Substring(0, 10).ToUpperInvariant());
         OriginalReservationId = command.OriginalReservationId;
+        CreatedAt = DateTime.UtcNow;
+        CertificateExpirationDate =
+            command.CertificateExpirationDate ?? CreatedAt.AddMonths(1);
     }
+    
+    public bool IsCertificateValid =>
+        DateTime.UtcNow <= CertificateExpirationDate;
 }

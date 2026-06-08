@@ -489,6 +489,27 @@ public static class CarResourceFromEntityAssembler
 {
     public static CarResource ToResourceFromEntity(Car entity)
     {
+        // Be defensive: PdfCertification.Base64Data may contain non-base64 data (e.g. data URL prefix)
+        // Use the domain value object validation before attempting to decode.
+        CertificationInfoResource? certInfo = null;
+        var pdf = entity.PdfCertification;
+        if (pdf != null && !string.IsNullOrEmpty(pdf.Base64Data) && pdf.IsValidBase64())
+        {
+            try
+            {
+                certInfo = new CertificationInfoResource
+                {
+                    SizeInBytes = Convert.FromBase64String(pdf.Base64Data).Length,
+                    HasCertification = true
+                };
+            }
+            catch
+            {
+                // Leave certInfo as null if decoding fails
+                certInfo = null;
+            }
+        }
+
         return new CarResource
         {
             Id = entity.Id,
@@ -497,13 +518,7 @@ public static class CarResourceFromEntityAssembler
             Price = entity.Price.Value,
             LicensePlate = entity.LicensePlate.Value,
             BrandId = entity.BrandId,
-                CertificationInfo = (entity.PdfCertification == null || string.IsNullOrEmpty(entity.PdfCertification.Base64Data))
-                ? null
-                : new CertificationInfoResource
-                {
-                    SizeInBytes = Convert.FromBase64String(entity.PdfCertification.Base64Data).Length,
-                    HasCertification = true
-                }
+            CertificationInfo = certInfo
         };
     }
 }

@@ -14,9 +14,7 @@ namespace CertiWeb.API.Certifications.Interfaces.REST;
 [Route("api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Car Certification Endpoints.")]
-/// <summary>
-/// REST API controller for managing car certification operations.
-/// </summary>
+
 public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService) : ControllerBase
 {
     /// <summary>
@@ -30,7 +28,7 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
         Console.WriteLine("--- CREATE CAR ACTION START ---");
         Console.WriteLine($"Received resource: Title='{resource.Title}', Year={resource.Year}, BrandId={resource.BrandId}, LicensePlate='{resource.LicensePlate}'");
 
-        // Generate defaults for ALL missing fields
+        // Generate defaults for missing fields, but reject explicitly invalid inputs
         if (string.IsNullOrWhiteSpace(resource.Title))
         {
             resource = resource with { Title = $"Car Certification {Guid.NewGuid().ToString().Substring(0, 8)}" };
@@ -49,16 +47,23 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             Console.WriteLine($"Generated OwnerEmail: {resource.OwnerEmail}");
         }
 
-        if (resource.Year == 0 || resource.Year < 1900 || resource.Year > DateTime.Now.Year + 1)
+        // Year: if omitted (0) generate a default, but if provided and invalid return BadRequest
+        if (resource.Year == 0)
         {
             resource = resource with { Year = DateTime.Now.Year };
             Console.WriteLine($"Generated Year: {resource.Year}");
         }
+        else if (resource.Year < 1900 || resource.Year > DateTime.Now.Year + 1)
+        {
+            Console.WriteLine($"!!! YEAR VALIDATION FAILED: Year '{resource.Year}' is out of allowed range.");
+            return BadRequest(new { message = "Validation error", details = "Year must be between 1900 and current year + 1" });
+        }
 
+        // BrandId: require a positive BrandId. Zero (0) is not accepted by the API validation layer
         if (resource.BrandId <= 0)
         {
-            resource = resource with { BrandId = 1 }; // Default to first brand
-            Console.WriteLine($"Generated BrandId: {resource.BrandId}");
+            Console.WriteLine($"!!! BRANDID VALIDATION FAILED: BrandId '{resource.BrandId}' is invalid.");
+            return BadRequest(new { message = "Validation error", details = "BrandId must be a positive integer and cannot be 0" });
         }
 
         if (string.IsNullOrWhiteSpace(resource.Model))
@@ -74,10 +79,16 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             Console.WriteLine($"Generated LicensePlate: {resource.LicensePlate}");
         }
 
-        if (resource.Price == 0 || resource.Price < 0)
+        // Price: if omitted (0) set default, but negative values are invalid
+        if (resource.Price == 0)
         {
             resource = resource with { Price = 100 };
             Console.WriteLine($"Set default Price: {resource.Price}");
+        }
+        else if (resource.Price < 0)
+        {
+            Console.WriteLine($"!!! PRICE VALIDATION FAILED: Price '{resource.Price}' is negative.");
+            return BadRequest(new { message = "Validation error", details = "Price must be non-negative" });
         }
 
         if (resource.OriginalReservationId == 0)
@@ -100,23 +111,25 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             Console.WriteLine($"!!! LICENSE PLATE VALIDATION FAILED: LicensePlate '{resource.LicensePlate}' contains a hyphen.");
             return BadRequest(new { message = "Validation error", details = "License plate cannot contain hyphens or special characters" });
         }
-         // Validate pdf certification base64 quick check before creating domain object
-        if (!string.IsNullOrWhiteSpace(resource.PdfCertification))
+        // PdfCertification: must be provided and valid Base64. Reject empty or invalid values
+        if (string.IsNullOrWhiteSpace(resource.PdfCertification))
         {
-            try
+            Console.WriteLine($"!!! PDF VALIDATION FAILED: PdfCertification is empty or missing.");
+            return BadRequest(new { message = "Validation error", details = "PdfCertification must be provided" });
+        }
+        try
+        {
+            var tmp = new CertiWeb.API.Certifications.Domain.Model.ValueObjects.PdfCertification(resource.PdfCertification);
+            if (!tmp.IsValidBase64())
             {
-                var tmp = new CertiWeb.API.Certifications.Domain.Model.ValueObjects.PdfCertification(resource.PdfCertification);
-                if (!tmp.IsValidBase64())
-                {
-                    Console.WriteLine($"!!! PDF VALIDATION FAILED: PdfCertification is not valid Base64.");
-                    return BadRequest(new { message = "Validation error", details = "Invalid PDF certification" });
-                }
+                Console.WriteLine($"!!! PDF VALIDATION FAILED: PdfCertification is not valid Base64.");
+                return BadRequest(new { message = "Validation error", details = "Invalid PDF certification" });
             }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine($"!!! PDF VALIDATION FAILED: {ex.Message}");
-                return BadRequest(new { message = "Validation error", details = "Invalid PDF certification: " + ex.Message });
-            }
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"!!! PDF VALIDATION FAILED: {ex.Message}");
+            return BadRequest(new { message = "Validation error", details = "Invalid PDF certification: " + ex.Message });
         }
 
         try

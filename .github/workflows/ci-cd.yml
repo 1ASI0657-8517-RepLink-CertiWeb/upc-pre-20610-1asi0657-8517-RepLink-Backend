@@ -72,4 +72,4 @@ jobs:
         context: .
         file: CertiWeb.API/Dockerfile 
         push: true
-        tags: svennn420/certiweb-api:latest
+        tags: guillermopromac/certiweb-api:latest

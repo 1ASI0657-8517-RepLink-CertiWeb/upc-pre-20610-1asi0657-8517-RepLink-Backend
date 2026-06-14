@@ -70,6 +70,6 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: CertiWeb.API/Dockerfile 
+        file: Dockerfile 
         push: true
         tags: guillermopromac/certiweb-api:latest

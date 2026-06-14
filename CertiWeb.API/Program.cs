@@ -57,12 +57,12 @@ if (connectionString == null) throw new InvalidOperationException("Connection st
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (builder.Environment.IsDevelopment())
-        options.UseNpgsql(connectionString)
+        options.UseMySQL(connectionString)
             .LogTo(Console.WriteLine, LogLevel.Information)
             .EnableSensitiveDataLogging(false)
             .EnableDetailedErrors();
     else if (builder.Environment.IsProduction())
-        options.UseNpgsql(connectionString)
+        options.UseMySQL(connectionString)
             .LogTo(Console.WriteLine, LogLevel.Error);
 });
 

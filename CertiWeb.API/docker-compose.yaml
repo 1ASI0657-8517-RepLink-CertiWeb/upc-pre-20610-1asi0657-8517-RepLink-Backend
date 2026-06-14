@@ -1,24 +1,30 @@
 services:
-
-  postgres:
-    image: postgres:15
+  mysql:
+    image: mysql:8.0
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: certiweb
+      MYSQL_ROOT_PASSWORD: rootpassword   # Contraseña del root
+      MYSQL_DATABASE: certiweb
+      MYSQL_USER: certiweb_user
+      MYSQL_PASSWORD: certiweb_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     networks:
       - certiweb-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     image: "svennn/certiweb-api:latest"
     ports:
       - "3000:8080"
     depends_on:
-      - postgres
+      mysql:
+        condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=certiweb;Uid=certiweb_user;Pwd=certiweb_password;
     networks:
       - certiweb-network
 
@@ -27,9 +33,10 @@ services:
     ports:
       - "3001:8080"
     depends_on:
-      - postgres
+      mysql:
+        condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=certiweb;Uid=certiweb_user;Pwd=certiweb_password;
     networks:
       - certiweb-network
 
@@ -57,7 +64,7 @@ services:
       - certiweb-network
 
 volumes:
-  postgres_data:
+  mysql_data:
 
 networks:
   certiweb-network:

@@ -10,7 +10,9 @@ public class RabbitMQProducer
 
     public RabbitMQProducer(IConfiguration configuration)
     {
-        _host = configuration["RabbitMQ__Host"] ?? "localhost";
+        _host = configuration["RabbitMQ__Host"]
+             ?? configuration["RabbitMQ:Host"]
+             ?? "rabbitmq";
     }
 
     public void Publish(string queueName, object message)

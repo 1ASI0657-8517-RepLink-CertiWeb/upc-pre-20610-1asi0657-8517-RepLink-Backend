@@ -25,7 +25,9 @@ public class CertificateConsumerService : BackgroundService
 
         try
         {
-            var host = _configuration["RabbitMQ__Host"] ?? "localhost";
+            var host = _configuration["RabbitMQ__Host"]
+                    ?? _configuration["RabbitMQ:Host"]
+                    ?? "rabbitmq";
             var factory = new ConnectionFactory { HostName = host };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();

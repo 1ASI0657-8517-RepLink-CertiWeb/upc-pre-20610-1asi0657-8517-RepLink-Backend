@@ -18,9 +18,8 @@ namespace CertiWeb.API.Certifications.Interfaces.REST;
 /// <summary>
 /// REST API controller for managing car certification operations.
 /// </summary>
-public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService, RabbitMQProducer producer) : ControllerBase
 
-public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService) : ControllerBase
+public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService, RabbitMQProducer producer) : ControllerBase
 {
     private readonly RabbitMQProducer _producer = producer;
     /// <summary>

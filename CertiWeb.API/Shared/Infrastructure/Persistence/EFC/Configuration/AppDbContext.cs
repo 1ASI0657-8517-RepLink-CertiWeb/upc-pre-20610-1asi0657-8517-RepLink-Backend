@@ -1,4 +1,3 @@
-
 using CertiWeb.API.Shared.Infrastructure.Persistence.EFC.Configuration.Extensions;
 using EntityFrameworkCore.CreatedUpdatedDate.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -48,21 +47,16 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         base.OnModelCreating(builder);
 
         // User Context
-        builder.Entity<User>(entity =>
-        {
-            entity.HasKey(d => d.Id);
-            entity.Property(d => d.Id).IsRequired().ValueGeneratedOnAdd();
-            entity.Property(d => d.name).IsRequired();
-            entity.Property(d => d.email).IsRequired();
-            entity.Property(d => d.password).IsRequired();
-            entity.Property(d => d.plan).IsRequired();
-            
-            // Audit columns for User Context
-            entity.Property(d => d.CreatedDate).HasColumnName("created_at");
-            entity.Property(d => d.UpdatedDate).HasColumnName("updated_at");
-            
-            entity.ToTable("users");
-        });
+        builder.Entity<User>().HasKey(d=>d.Id);
+        builder.Entity<User>().Property(d => d.Id).IsRequired().ValueGeneratedOnAdd();
+        builder.Entity<User>().Property(d=>d.name).IsRequired();
+        builder.Entity<User>().Property(d=>d.email).IsRequired();
+        builder.Entity<User>().Property(d=>d.password).IsRequired();
+        builder.Entity<User>().Property(d=>d.plan).IsRequired();
+        
+        // Audit columns for User Context
+        builder.Entity<User>().Property(d => d.CreatedDate).HasColumnName("created_at");
+        builder.Entity<User>().Property(d => d.UpdatedDate).HasColumnName("updated_at");
         
         // AdminUser Context Configuration
         builder.Entity<AdminUser>(entity =>
@@ -96,7 +90,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
             entity.Property(r => r.Model).IsRequired().HasMaxLength(50);
             entity.Property(r => r.LicensePlate).IsRequired().HasMaxLength(7);
             entity.Property(r => r.InspectionDateTime).IsRequired();
-            entity.Property(r => r.Price).IsRequired().HasPrecision(18, 2);
+            entity.Property(r => r.Price).IsRequired().HasMaxLength(20);
             entity.Property(r => r.Status).IsRequired().HasMaxLength(20);
             
             // Audit fields mapping
@@ -159,8 +153,8 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
                     pdf => pdf.Base64Data,
                     value => new CertiWeb.API.Certifications.Domain.Model.ValueObjects.PdfCertification(value)
                 )
-                .HasColumnType("text")
-                .IsUnicode(true)
+                .HasColumnType("LONGTEXT")
+                .IsUnicode(false)
                 .IsRequired();
             
             // Foreign Key Configuration

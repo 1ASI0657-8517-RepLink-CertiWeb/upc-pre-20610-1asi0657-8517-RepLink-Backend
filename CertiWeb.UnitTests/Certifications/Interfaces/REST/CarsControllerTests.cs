@@ -23,7 +23,9 @@ public class CarsControllerTests
     {
         _carCommandServiceMock = new Mock<ICarCommandService>();
         _carQueryServiceMock = new Mock<ICarQueryService>();
-        _controller = new CarsController(_carCommandServiceMock.Object, _carQueryServiceMock.Object);
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
+        var producer = new CertiWeb.API.Shared.Infrastructure.Messaging.RabbitMQProducer(configuration);
+        _controller = new CarsController(_carCommandServiceMock.Object, _carQueryServiceMock.Object, producer);
     }
 
     #region UpdateCar Tests

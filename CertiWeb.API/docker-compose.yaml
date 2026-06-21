@@ -16,11 +16,27 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - certiweb-network
+
   api:
-    image: "svennn/certiweb-api:latest"
+    image: "certiweb-api:local"
     ports:
       - "3000:8080"
     depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
+      - RabbitMQ__Host=rabbitmq
       mysql:
         condition: service_healthy
     environment:
@@ -29,10 +45,15 @@ services:
       - certiweb-network
 
   api2:
-    image: "svennn/certiweb-api:latest"
+    image: "certiweb-api:local"
     ports:
       - "3001:8080"
     depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;User Id=postgres;Password=postgres;Database=certiweb
+      - RabbitMQ__Host=rabbitmq
       mysql:
         condition: service_healthy
     environment:
@@ -52,16 +73,16 @@ services:
     networks:
       - certiweb-network
 
-  frontend:
-    image: "svennn/certiweb-frontend:latest"
-    ports:
-      - "5173:80"
-    depends_on:
-      - nginx
-    environment:
-      - VITE_SERVER_BASE_PATH=http://nginx:80/api/v1
-    networks:
-      - certiweb-network
+#  frontend:
+#    image: "svennn/certiweb-frontend:latest"
+#    ports:
+#      - "5173:80"
+#    depends_on:
+#      - nginx
+#    environment:
+#      - VITE_SERVER_BASE_PATH=http://nginx:80/api/v1
+#    networks:
+#      - certiweb-network
 
 volumes:
   mysql_data:

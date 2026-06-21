@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using CertiWeb.API.Certifications.Domain.Model.Aggregates;
+using CertiWeb.API.Shared.Infrastructure.Messaging;
 using CertiWeb.API.Certifications.Domain.Model.Commands;
 using CertiWeb.API.Certifications.Domain.Model.Queries;
 using CertiWeb.API.Certifications.Domain.Services;
@@ -14,9 +15,13 @@ namespace CertiWeb.API.Certifications.Interfaces.REST;
 [Route("api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Car Certification Endpoints.")]
+/// <summary>
+/// REST API controller for managing car certification operations.
+/// </summary>
 
-public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService) : ControllerBase
+public class CarsController(ICarCommandService carCommandService, ICarQueryService carQueryService, RabbitMQProducer producer) : ControllerBase
 {
+    private readonly RabbitMQProducer _producer = producer;
     /// <summary>
     /// Creates a new car certification in the system.
     /// </summary>
@@ -184,6 +189,11 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
             }
             
             Console.WriteLine($"Car created with ID: {car.Id}. Returning CreatedAtAction.");
+            _producer.Publish("inspection.completed", new {
+                CarId = car.Id,
+                LicensePlate = car.LicensePlate.ToString(),
+                Timestamp = DateTime.UtcNow
+            });
             var carResource = CarResourceFromEntityAssembler.ToResourceFromEntity(car);
             return CreatedAtAction(nameof(GetCarById), new { carId = car.Id }, carResource);
         }

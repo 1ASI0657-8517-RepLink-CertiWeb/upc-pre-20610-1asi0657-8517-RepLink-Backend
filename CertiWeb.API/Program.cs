@@ -153,6 +153,9 @@ builder.Services.AddScoped<IAdminUserQueryService, AdminUserQueryService>();
 builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
 builder.Services.AddScoped<IUsersContextFacade, UsersContextFacade>();
 
+builder.Services.AddSingleton<CertiWeb.API.Shared.Infrastructure.Messaging.RabbitMQProducer>();
+builder.Services.AddHostedService<CertiWeb.API.Shared.Infrastructure.Messaging.CertificateConsumerService>();
+
 var app = builder.Build();
 
 // Verify if the database exists and create it if it doesn't

@@ -158,4 +158,16 @@ public class Car
     
     public bool IsCertificateValid =>
         DateTime.UtcNow <= CertificateExpirationDate;
+    
+    /// <summary>
+    /// Updates the certificate signature for this car.
+    /// This method is intentionally public so application/services can update the signature
+    /// after persistence (e.g., from a background job) while keeping the setter private.
+    /// </summary>
+    /// <param name="signature">Hex-encoded SHA256 signature (64 chars).</param>
+    public void UpdateCertificateSignature(string signature)
+    {
+        if (string.IsNullOrWhiteSpace(signature)) throw new ArgumentException("Signature cannot be empty", nameof(signature));
+        CertificateSignature = signature;
+    }
 }

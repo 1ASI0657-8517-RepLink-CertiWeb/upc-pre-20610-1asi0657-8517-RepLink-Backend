@@ -103,6 +103,12 @@ public class Car
     public DateTime CertificateExpirationDate { get; private set; }
 
     /// <summary>
+    /// Gets the digital SHA256 signature of the certificate.
+    /// </summary>
+    [MaxLength(64)]
+    public string? CertificateSignature { get; private set; }
+
+    /// <summary>
     /// Parameterless constructor for EF Core and tests.
     /// </summary>
     public Car()
@@ -138,8 +144,30 @@ public class Car
         CreatedAt = DateTime.UtcNow;
         CertificateExpirationDate =
             command.CertificateExpirationDate ?? CreatedAt.AddMonths(1);
+        
+        // Generate SHA256 digital signature for certificate integrity verification
+        CertificateSignature = ValueObjects.CertificateSignature
+            .Generate(
+                command.LicensePlate ?? string.Empty,
+                command.OwnerEmail,
+                command.Model,
+                command.Year,
+                CreatedAt)
+            .Hash;
     }
     
     public bool IsCertificateValid =>
         DateTime.UtcNow <= CertificateExpirationDate;
+    
+    /// <summary>
+    /// Updates the certificate signature for this car.
+    /// This method is intentionally public so application/services can update the signature
+    /// after persistence (e.g., from a background job) while keeping the setter private.
+    /// </summary>
+    /// <param name="signature">Hex-encoded SHA256 signature (64 chars).</param>
+    public void UpdateCertificateSignature(string signature)
+    {
+        if (string.IsNullOrWhiteSpace(signature)) throw new ArgumentException("Signature cannot be empty", nameof(signature));
+        CertificateSignature = signature;
+    }
 }

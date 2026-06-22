@@ -15,22 +15,25 @@ public static class CarResourceFromEntityAssembler
     /// <returns>The corresponding resource.</returns>
     public static CarResource ToResourceFromEntity(Car entity)
     {
-        return new CarResource
-        {
-            Id = entity.Id,
-            Title = entity.Title ?? string.Empty,
-            Owner = entity.Owner ?? string.Empty,
-            OwnerEmail = entity.OwnerEmail ?? string.Empty,
-            Year = entity.Year,
-            BrandId = entity.BrandId,
-            Brand = entity.Brand?.Name ?? string.Empty,
-            Model = entity.Model ?? string.Empty,
-            Description = entity.Description,
-            ImageUrl = entity.ImageUrl,
-            Price = entity.Price,
-            LicensePlate = entity.LicensePlate ?? string.Empty,
-            OriginalReservationId = entity.OriginalReservationId,
-            HasPdfCertification = !string.IsNullOrEmpty(entity.PdfCertification?.Base64Data)
-        };
+        return new CarResource(
+            Id: entity.Id,
+            Title: entity.Title ?? string.Empty,
+            Owner: entity.Owner ?? string.Empty,
+            OwnerEmail: entity.OwnerEmail ?? string.Empty,
+            Year: entity.Year,
+            BrandId: entity.BrandId,
+            Brand: entity.Brand?.Name ?? string.Empty,
+            Model: entity.Model ?? string.Empty,
+            Description: entity.Description,
+            ImageUrl: entity.ImageUrl,
+            Price: entity.Price,
+            LicensePlate: entity.LicensePlate ?? string.Empty,
+            OriginalReservationId: entity.OriginalReservationId,
+            HasPdfCertification: !string.IsNullOrEmpty(entity.PdfCertification?.Base64Data),
+            CreatedAt: entity.CreatedAt,
+            CertificateExpirationDate: entity.CertificateExpirationDate,
+            IsCertificateValid: entity.IsCertificateValid,
+            CertificateSignature: entity.CertificateSignature
+        );
     }
 }

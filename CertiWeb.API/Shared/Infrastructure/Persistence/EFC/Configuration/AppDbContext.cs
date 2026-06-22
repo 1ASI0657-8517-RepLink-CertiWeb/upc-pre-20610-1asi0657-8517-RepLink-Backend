@@ -157,6 +157,10 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
                 .IsUnicode(false)
                 .IsRequired();
             
+            entity.Property(c => c.CertificateSignature)
+                .HasMaxLength(64)
+                .IsRequired(false);
+            
             // Foreign Key Configuration
             entity.HasOne(c => c.Brand)
                 .WithMany()

@@ -431,4 +431,47 @@ public class CarsController(ICarCommandService carCommandService, ICarQueryServi
 
         return Ok(resource);
     }
+    
+    /// <summary>
+    /// Verifies the SHA256 digital signature of a vehicle certificate.
+    /// </summary>
+    /// <param name="id">The ID of the car to verify.</param>
+    /// <returns>Verification result with signature validity status.</returns>
+    [HttpGet("{id:int}/verify-signature")]
+    [SwaggerOperation(Summary = "Verify SHA256 digital signature of the certificate")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Signature verification result")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Certificate not found")]
+    public async Task<IActionResult> VerifyCertificateSignature(int id)
+    {
+        var query = new GetCarByIdQuery(id);
+        var car = await carQueryService.Handle(query);
+
+        if (car == null)
+            return NotFound(new { message = $"Car with ID {id} not found." });
+
+        if (string.IsNullOrEmpty(car.CertificateSignature))
+            return Ok(new { carId = id, isValid = false, reason = "No signature found." });
+
+        var signature = new CertiWeb.API.Certifications.Domain.Model.ValueObjects
+            .CertificateSignature(car.CertificateSignature);
+
+        var isValid = signature.Verify(
+            car.LicensePlate,
+            car.OwnerEmail,
+            car.Model,
+            car.Year.Value,
+            car.CreatedAt);
+
+        return Ok(new 
+        { 
+            carId = id, 
+            isValid, 
+            signature = car.CertificateSignature,
+            licensePlate = car.LicensePlate,
+            ownerEmail = car.OwnerEmail,
+            model = car.Model,
+            year = car.Year.Value,
+            createdAt = car.CreatedAt
+        });
+    }
 }

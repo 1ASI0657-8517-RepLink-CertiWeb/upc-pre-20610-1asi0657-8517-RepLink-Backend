@@ -33,6 +33,7 @@ using CertiWeb.API.Users.Interfaces.ACL;
 using CertiWeb.API.Shared.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using CertiWeb.API.Shared.Infrastructure.BackgroundTasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -139,6 +140,10 @@ builder.Services.AddScoped<BrandQueryServiceImpl>();
 
 // Storage Service for PDF management
 builder.Services.AddScoped<IStorageService, LocalBase64StorageService>();
+
+// Background task queue and processing service (in-memory)
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+builder.Services.AddHostedService<BackgroundProcessingService>();
 
 // Reservation Bounded Context Dependency Injection Configuration
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();

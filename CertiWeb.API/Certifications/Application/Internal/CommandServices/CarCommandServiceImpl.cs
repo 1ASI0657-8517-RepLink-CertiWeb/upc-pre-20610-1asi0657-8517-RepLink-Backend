@@ -4,13 +4,15 @@ using CertiWeb.API.Certifications.Domain.Model.ValueObjects;
 using CertiWeb.API.Certifications.Domain.Services;
 using CertiWeb.API.Shared.Domain.Repositories;
 using CertiWeb.API.Certifications.Domain.Repositories;
+using CertiWeb.API.Shared.Infrastructure.BackgroundTasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CertiWeb.API.Certifications.Application.Internal.CommandServices;
 
 /// <summary>
 /// Implementation of the car command service that handles car creation and update operations.
 /// </summary>
-public class CarCommandServiceImpl(ICarRepository carRepository, IBrandRepository brandRepository, IUnitOfWork unitOfWork) : ICarCommandService
+public class CarCommandServiceImpl(ICarRepository carRepository, IBrandRepository brandRepository, IUnitOfWork unitOfWork, IBackgroundTaskQueue? backgroundTaskQueue = null, IServiceProvider? serviceProvider = null) : ICarCommandService
 {
     /// <summary>
     /// Handles the creation of a new car certification in the system.
@@ -109,6 +111,58 @@ public class CarCommandServiceImpl(ICarRepository carRepository, IBrandRepositor
         }
 
         Console.WriteLine($"Car created successfully with ID: {car.Id}");
+
+        // Enqueue background work to (re)validate/regenerate certificate signature.
+        try
+        {
+            if (backgroundTaskQueue != null && serviceProvider != null)
+            {
+                var carId = car.Id;
+                backgroundTaskQueue.QueueBackgroundWorkItem(async ct =>
+                {
+                    try
+                    {
+                        using var scope = serviceProvider.CreateScope();
+                        var scopedRepo = scope.ServiceProvider.GetRequiredService<ICarRepository>();
+                        var scopedUow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                        var carFromDb = await scopedRepo.FindByIdAsync(carId);
+                        if (carFromDb == null) return;
+
+                        var expected = CertificateSignature.Generate(
+                            carFromDb.LicensePlate,
+                            carFromDb.OwnerEmail,
+                            carFromDb.Model,
+                            carFromDb.Year.Value,
+                            carFromDb.CreatedAt).Hash;
+
+                        if (string.IsNullOrEmpty(carFromDb.CertificateSignature) || !string.Equals(carFromDb.CertificateSignature, expected, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Update via domain method to keep encapsulation
+                            carFromDb.UpdateCertificateSignature(expected);
+                            scopedRepo.Update(carFromDb);
+                            try
+                            {
+                                await scopedUow.CompleteAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Background update of certificate signature failed for car {carId}: {ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error executing background signature job for car {car.Id}: {ex.Message}");
+                    }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to enqueue background job for car {car.Id}: {ex.Message}");
+        }
+
         return car;
     }
     
